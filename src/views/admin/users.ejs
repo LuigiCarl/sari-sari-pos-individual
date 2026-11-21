@@ -20,26 +20,52 @@
   </div>
 
   <div class="card">
-    <h2>All Users</h2>
-    <table class="table">
-      <thead><tr><th>Username</th><th>Full Name</th><th>Role</th><th>Status</th><th>Created</th><th></th></tr></thead>
-      <tbody>
-        <% users.forEach(u => { %>
-          <tr class="<%= !u.active ? 'row-muted' : '' %>">
-            <td><%= u.username %></td>
-            <td><%= u.full_name %></td>
-            <td><%= u.role === 'admin' ? 'Admin' : 'Sales Rep' %></td>
-            <td><%= u.active ? 'Active' : 'Inactive' %></td>
-            <td><%= u.created_at %></td>
-            <td>
-              <form method="POST" action="/admin/users/<%= u.id %>/toggle-active" class="inline-form">
-                <button type="submit" class="btn btn-small"><%= u.active ? 'Deactivate' : 'Activate' %></button>
-              </form>
-            </td>
+    <div class="table-header-bar">
+      <h2>All Users</h2>
+      <div class="table-toolbar">
+        <div class="table-search">
+          <span class="table-search-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+          </span>
+          <input type="search" data-table-filter="usersTable" placeholder="Filter users..." aria-label="Filter users" />
+        </div>
+        <span class="table-count" data-table-count="usersTable"><%= users.length %> total</span>
+        <button type="button" class="btn-export" data-table-export="usersTable" data-export-filename="sari-sari-users">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="table" id="usersTable" data-paginate="10">
+        <thead>
+          <tr>
+            <th data-sort="text">Username</th>
+            <th data-sort="text">Full Name</th>
+            <th data-sort="text">Role</th>
+            <th data-sort="text">Status</th>
+            <th data-sort="text">Created</th>
+            <th class="col-actions">Action</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr class="<%= !u.active ? 'row-muted' : '' %>">
+              <td class="mono"><%= u.username %></td>
+              <td><%= u.full_name %></td>
+              <td><span class="badge <%= u.role === 'admin' ? 'badge-info' : '' %>"><%= u.role === 'admin' ? 'Admin' : 'Sales Rep' %></span></td>
+              <td><span class="badge <%= u.active ? 'badge-success' : 'badge-danger' %>"><%= u.active ? 'Active' : 'Inactive' %></span></td>
+              <td class="muted"><%= u.created_at %></td>
+              <td class="col-actions">
+                <form method="POST" action="/admin/users/<%= u.id %>/toggle-active" class="inline-form">
+                  <button type="submit" class="btn btn-small <%= u.active ? 'btn-secondary' : 'btn-primary' %>"><%= u.active ? 'Deactivate' : 'Activate' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 <%- include('../partials/foot') %>

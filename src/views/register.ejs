@@ -1,21 +1,31 @@
 <%- include('partials/head') %>
 <div class="login-page">
   <form method="POST" action="/register" class="login-card">
-    <h1>🏪 Sari-Sari POS</h1>
-    <p class="muted">Create an account</p>
-    <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+    <div class="login-brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l1.5-5h15L21 9" />
+          <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+          <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+          <path d="M9 21v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" />
+        </svg>
+      </span>
+      <h1>Sari-Sari POS</h1>
+    </div>
+    <p class="login-subtitle">Create an account</p>
+    <% if (flash && flash.error) { %><div class="alert alert-error" role="alert"><%= flash.error %></div><% } %>
 
     <label>Full Name
-      <input type="text" name="full_name" required autofocus />
+      <input type="text" name="full_name" autocomplete="name" required autofocus />
     </label>
     <label>Username
-      <input type="text" name="username" required />
+      <input type="text" name="username" autocomplete="username" required />
     </label>
     <label>Password
-      <input type="password" name="password" required minlength="6" />
+      <input type="password" name="password" autocomplete="new-password" required minlength="6" />
     </label>
     <label>Confirm Password
-      <input type="password" name="confirm_password" required minlength="6" />
+      <input type="password" name="confirm_password" autocomplete="new-password" required minlength="6" />
     </label>
     <label>Account Type
       <select name="role" id="roleSelect">
@@ -27,13 +37,13 @@
       <input type="text" name="admin_code" id="adminCodeInput" autocomplete="off" />
     </label>
     <% if (!adminSignupEnabled) { %>
-      <p class="muted" style="font-size: 0.8rem; margin: -0.5rem 0 0;">
+      <p class="muted" style="font-size: 0.8rem; margin: -0.35rem 0 0;">
         Admin self-registration is currently disabled. New admins must be created from the Admin &gt; Users page.
       </p>
     <% } %>
 
     <button type="submit" class="btn btn-primary btn-block">Create Account</button>
-    <p class="muted" style="text-align: center; margin: 0;">
+    <p class="muted login-footer-link">
       Already have an account? <a href="/login">Login</a>
     </p>
   </form>

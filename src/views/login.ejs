@@ -1,17 +1,27 @@
 <%- include('partials/head') %>
 <div class="login-page">
   <form method="POST" action="/login" class="login-card">
-    <h1>🏪 Sari-Sari POS</h1>
-    <p class="muted">Sign in to continue</p>
-    <% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+    <div class="login-brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l1.5-5h15L21 9" />
+          <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+          <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+          <path d="M9 21v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" />
+        </svg>
+      </span>
+      <h1>Sari-Sari POS</h1>
+    </div>
+    <p class="login-subtitle">Sign in to continue</p>
+    <% if (flash && flash.error) { %><div class="alert alert-error" role="alert"><%= flash.error %></div><% } %>
     <label>Username
-      <input type="text" name="username" autofocus required />
+      <input type="text" name="username" autocomplete="username" autofocus required />
     </label>
     <label>Password
-      <input type="password" name="password" required />
+      <input type="password" name="password" autocomplete="current-password" required />
     </label>
     <button type="submit" class="btn btn-primary btn-block">Login</button>
-    <p class="muted" style="text-align: center; margin: 0;">
+    <p class="muted login-footer-link">
       No account yet? <a href="/register">Register</a>
     </p>
   </form>

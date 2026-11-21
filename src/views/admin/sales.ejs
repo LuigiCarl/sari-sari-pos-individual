@@ -7,30 +7,59 @@
     <form method="GET" action="/admin/sales" class="form-inline">
       <label>From <input type="date" name="from" value="<%= from %>" /></label>
       <label>To <input type="date" name="to" value="<%= to %>" /></label>
-      <button type="submit" class="btn btn-secondary">Filter</button>
-      <a href="/admin/sales" class="btn btn-small">Clear</a>
+      <button type="submit" class="btn btn-primary">Filter</button>
+      <a href="/admin/sales" class="btn btn-secondary">Clear</a>
     </form>
   </div>
 
   <div class="card">
+    <div class="table-header-bar">
+      <h2>Transactions</h2>
+      <% if (sales.length > 0) { %>
+        <div class="table-toolbar">
+          <div class="table-search">
+            <span class="table-search-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            </span>
+            <input type="search" data-table-filter="salesTable" placeholder="Search receipt or cashier..." aria-label="Search sales" />
+          </div>
+          <span class="table-count" data-table-count="salesTable"><%= sales.length %> total</span>
+          <button type="button" class="btn-export" data-table-export="salesTable" data-export-filename="sari-sari-sales">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+            Export CSV
+          </button>
+        </div>
+      <% } %>
+    </div>
     <% if (sales.length === 0) { %>
       <p class="muted">No transactions found.</p>
     <% } else { %>
-      <table class="table">
-        <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>Paid</th><th>Change</th><th>When</th></tr></thead>
-        <tbody>
-          <% sales.forEach(s => { %>
+      <div class="table-scroll table-scroll--tall">
+        <table class="table" id="salesTable" data-paginate="10">
+          <thead>
             <tr>
-              <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
-              <td><%= s.cashier %></td>
-              <td><%= peso(s.total_amount) %></td>
-              <td><%= peso(s.amount_paid) %></td>
-              <td><%= peso(s.change_amount) %></td>
-              <td><%= s.created_at %></td>
+              <th data-sort="text">Receipt</th>
+              <th data-sort="text">Cashier</th>
+              <th class="num" data-sort="number">Total</th>
+              <th class="num" data-sort="number">Paid</th>
+              <th class="num" data-sort="number">Change</th>
+              <th data-sort="text">When</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% sales.forEach(s => { %>
+              <tr>
+                <td class="mono"><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
+                <td><%= s.cashier %></td>
+                <td class="num text-success"><%= peso(s.total_amount) %></td>
+                <td class="num"><%= peso(s.amount_paid) %></td>
+                <td class="num"><%= peso(s.change_amount) %></td>
+                <td class="muted"><%= s.created_at %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
   </div>
 </main>

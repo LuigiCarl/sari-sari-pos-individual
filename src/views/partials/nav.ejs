@@ -1,25 +1,47 @@
 <header class="topbar">
-  <div class="topbar-brand">🏪 Sari-Sari POS</div>
-  <nav class="topbar-nav">
-    <% if (currentUser && currentUser.role === 'admin') { %>
-      <a href="/admin/dashboard">Dashboard</a>
-      <a href="/admin/products">Products</a>
-      <a href="/admin/sales">Sales</a>
-      <a href="/admin/inventory-reports">Inventory Reports</a>
-      <a href="/admin/users">Users</a>
-    <% } else if (currentUser && currentUser.role === 'sales_rep') { %>
-      <a href="/pos">Point of Sale</a>
-      <a href="/pos/inventory">Inventory</a>
-    <% } %>
-  </nav>
-  <div class="topbar-user">
-    <% if (currentUser) { %>
-      <span><%= currentUser.fullName %> (<%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %>)</span>
-      <form method="POST" action="/logout" class="inline-form">
-        <button type="submit" class="link-button">Logout</button>
-      </form>
-    <% } %>
+  <div class="topbar-inner">
+    <a href="/" class="topbar-brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l1.5-5h15L21 9" />
+          <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+          <path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8" />
+          <path d="M9 21v-5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v5" />
+        </svg>
+      </span>
+      <span>Sari-Sari POS</span>
+    </a>
+
+    <nav class="topbar-nav" aria-label="Main navigation">
+      <% const p = typeof currentPath === 'string' ? currentPath : ''; %>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <a href="/admin/dashboard" class="<%= p.startsWith('/admin/dashboard') ? 'is-active' : '' %>">Dashboard</a>
+        <a href="/admin/products" class="<%= p.startsWith('/admin/products') ? 'is-active' : '' %>">Products</a>
+        <a href="/admin/sales" class="<%= p.startsWith('/admin/sales') ? 'is-active' : '' %>">Sales</a>
+        <a href="/admin/inventory-reports" class="<%= p.startsWith('/admin/inventory-reports') ? 'is-active' : '' %>">Inventory Reports</a>
+        <a href="/admin/users" class="<%= p.startsWith('/admin/users') ? 'is-active' : '' %>">Users</a>
+      <% } else if (currentUser && currentUser.role === 'sales_rep') { %>
+        <a href="/pos" class="<%= p === '/pos' || p === '/pos/' ? 'is-active' : '' %>">Point of Sale</a>
+        <a href="/pos/inventory" class="<%= p.startsWith('/pos/inventory') ? 'is-active' : '' %>">Inventory</a>
+      <% } %>
+    </nav>
+
+    <div class="topbar-user">
+      <% if (currentUser) { %>
+        <span class="user-pill">
+          <span class="user-name"><%= currentUser.fullName %></span>
+          <span class="role-badge"><%= currentUser.role === 'admin' ? 'Admin' : 'Sales Rep' %></span>
+        </span>
+        <form method="POST" action="/logout" class="inline-form">
+          <button type="submit" class="btn-logout">Logout</button>
+        </form>
+      <% } %>
+    </div>
   </div>
 </header>
-<% if (flash && flash.success) { %><div class="alert alert-success"><%= flash.success %></div><% } %>
-<% if (flash && flash.error) { %><div class="alert alert-error"><%= flash.error %></div><% } %>
+<% if (flash && flash.success) { %>
+  <div class="alert-wrap"><div class="alert alert-success" role="status"><%= flash.success %></div></div>
+<% } %>
+<% if (flash && flash.error) { %>
+  <div class="alert-wrap"><div class="alert alert-error" role="alert"><%= flash.error %></div></div>
+<% } %>

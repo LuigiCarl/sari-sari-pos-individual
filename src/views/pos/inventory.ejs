@@ -28,19 +28,42 @@
   </div>
 
   <div class="card">
-    <h2>Current Stock</h2>
-    <table class="table">
-      <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
-      <tbody>
-        <% products.forEach(p => { %>
-          <tr class="<%= p.stock_quantity <= p.reorder_level ? 'row-warning' : '' %>">
-            <td><%= p.name %></td>
-            <td><%= p.stock_quantity %> <%= p.unit %></td>
-            <td><%= p.reorder_level %></td>
+    <div class="table-header-bar">
+      <h2>Current Stock</h2>
+      <div class="table-toolbar">
+        <div class="table-search">
+          <span class="table-search-icon" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+          </span>
+          <input type="search" data-table-filter="stockTable" placeholder="Filter stock..." aria-label="Filter stock" />
+        </div>
+        <span class="table-count" data-table-count="stockTable"><%= products.length %> total</span>
+        <button type="button" class="btn-export" data-table-export="stockTable" data-export-filename="sari-sari-stock">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+    <div class="table-scroll table-scroll--tall">
+      <table class="table" id="stockTable" data-paginate="10">
+        <thead>
+          <tr>
+            <th data-sort="text">Product</th>
+            <th class="num" data-sort="number">Stock</th>
+            <th class="num" data-sort="number">Reorder Level</th>
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% products.forEach(p => { %>
+            <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : (p.stock_quantity <= p.reorder_level ? 'row-warning' : '') %>">
+              <td><%= p.name %></td>
+              <td class="num"><%= p.stock_quantity %> <%= p.unit %></td>
+              <td class="num"><%= p.reorder_level %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="card">
@@ -48,20 +71,36 @@
     <% if (myReports.length === 0) { %>
       <p class="muted">You haven't submitted any reports yet.</p>
     <% } else { %>
-      <table class="table">
-        <thead><tr><th>Product</th><th>Type</th><th>Change</th><th>Note</th><th>When</th></tr></thead>
-        <tbody>
-          <% myReports.forEach(r => { %>
+      <div class="table-scroll">
+        <table class="table" id="myReportsTable" data-paginate="8">
+          <thead>
             <tr>
-              <td><%= r.product_name %></td>
-              <td><%= r.type %></td>
-              <td><%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %></td>
-              <td><%= r.note || '—' %></td>
-              <td><%= r.created_at %></td>
+              <th data-sort="text">Product</th>
+              <th data-sort="text">Type</th>
+              <th class="num" data-sort="number">Change</th>
+              <th data-sort="text">Note</th>
+              <th data-sort="text">When</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% myReports.forEach(r => { %>
+              <tr>
+                <td><%= r.product_name %></td>
+                <td>
+                  <span class="badge <%= r.type === 'restock' ? 'badge-success' : (r.type === 'correction' ? 'badge-info' : 'badge-warning') %>">
+                    <%= r.type %>
+                  </span>
+                </td>
+                <td class="num <%= r.quantity_change > 0 ? 'text-success' : 'text-danger' %>">
+                  <%= r.quantity_change > 0 ? '+' : '' %><%= r.quantity_change %>
+                </td>
+                <td class="muted"><%= r.note || '—' %></td>
+                <td class="muted"><%= r.created_at %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
     <% } %>
   </div>
 </main>

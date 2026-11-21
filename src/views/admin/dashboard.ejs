@@ -7,112 +7,338 @@
     <div class="stat-card">
       <div class="stat-label">Today</div>
       <div class="stat-value"><%= peso(todayTotal.total) %></div>
-      <div class="stat-sub"><%= todayTotal.count %> transaction<%= todayTotal.count === 1 ? '' : 's' %></div>
+      <div class="stat-sub"><%= todayTotal.count %> transaction<%= Number(todayTotal.count) === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Last 7 Days</div>
       <div class="stat-value"><%= peso(weekTotal.total) %></div>
-      <div class="stat-sub"><%= weekTotal.count %> transaction<%= weekTotal.count === 1 ? '' : 's' %></div>
+      <div class="stat-sub"><%= weekTotal.count %> transaction<%= Number(weekTotal.count) === 1 ? '' : 's' %></div>
     </div>
     <div class="stat-card">
       <div class="stat-label">This Month</div>
       <div class="stat-value"><%= peso(monthTotal.total) %></div>
-      <div class="stat-sub"><%= monthTotal.count %> transaction<%= monthTotal.count === 1 ? '' : 's' %></div>
+      <div class="stat-sub"><%= monthTotal.count %> transaction<%= Number(monthTotal.count) === 1 ? '' : 's' %></div>
+    </div>
+  </div>
+
+  <%
+    const trendValues = trendData.map(d => Number(d.total) || 0);
+    const trendPeak = trendValues.length ? Math.max(...trendValues) : 0;
+    const trendAvg = trendValues.length ? trendValues.reduce((a, b) => a + b, 0) / trendValues.length : 0;
+    const catColors = ['#22c55e', '#38bdf8', '#a78bfa', '#fbbf24', '#f472b6', '#2dd4bf'];
+    const totalCatRev = categorySales.reduce((s, c) => s + Number(c.revenue), 0);
+    const maxTopRev = topProducts.length ? Math.max(...topProducts.map(p => Number(p.revenue))) : 1;
+  %>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="chart-header">
+        <div>
+          <h2>Sales Trend (7 days)</h2>
+          <div class="chart-subtitle">Daily gross revenue</div>
+        </div>
+        <div class="chart-kpis">
+          <span class="chart-kpi-pill">Peak <strong><%= peso(trendPeak) %></strong></span>
+          <span class="chart-kpi-pill">Avg <strong><%= peso(trendAvg) %></strong></span>
+        </div>
+      </div>
+      <div class="chart-box">
+        <canvas id="salesTrendChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chart-header">
+        <div>
+          <h2>Revenue by Category</h2>
+          <div class="chart-subtitle">Last 30 days share</div>
+        </div>
+      </div>
+      <% if (categorySales.length === 0) { %>
+        <p class="muted">No category sales recorded yet.</p>
+      <% } else { %>
+        <div class="doughnut-layout">
+          <div class="doughnut-wrap">
+            <canvas id="categoryChart"></canvas>
+            <div class="doughnut-center">
+              <span class="doughnut-center-label">30-Day Total</span>
+              <span class="doughnut-center-value"><%= peso(totalCatRev) %></span>
+            </div>
+          </div>
+          <ul class="chart-legend">
+            <% categorySales.forEach((c, idx) => { %>
+              <% const pct = totalCatRev > 0 ? Math.round((c.revenue / totalCatRev) * 100) : 0; %>
+              <li>
+                <span class="legend-left">
+                  <span class="legend-dot" style="background: <%= catColors[idx % catColors.length] %>; box-shadow: 0 0 8px <%= catColors[idx % catColors.length] %>88;"></span>
+                  <span class="legend-name"><%= c.category %></span>
+                </span>
+                <span class="legend-val">
+                  <%= peso(c.revenue) %><span class="legend-pct"><%= pct %>%</span>
+                </span>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
     </div>
   </div>
 
   <div class="grid-2">
-    <div class="card">
-      <h2>Sales Trend (7 days)</h2>
-      <canvas id="salesTrendChart" height="220"></canvas>
-    </div>
-
     <div class="card">
       <h2>Top Products (30 days)</h2>
       <% if (topProducts.length === 0) { %>
         <p class="muted">No sales recorded yet.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead>
-          <tbody>
-            <% topProducts.forEach(p => { %>
+        <div class="table-scroll">
+          <table class="table">
+            <thead>
               <tr>
-                <td><%= p.product_name %></td>
-                <td><%= p.units_sold %></td>
-                <td><%= peso(p.revenue) %></td>
+                <th data-sort="text">Product</th>
+                <th class="num" data-sort="number">Units</th>
+                <th class="num" data-sort="number">Revenue</th>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <% topProducts.forEach(p => { %>
+                <% const barPct = Math.max(8, Math.round((Number(p.revenue) / maxTopRev) * 100)); %>
+                <tr>
+                  <td>
+                    <div><%= p.product_name %></div>
+                    <div class="rev-bar-track"><div class="rev-bar-fill" style="width: <%= barPct %>%;"></div></div>
+                  </td>
+                  <td class="num"><%= p.units_sold %></td>
+                  <td class="num text-success"><%= peso(p.revenue) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
-  </div>
 
-  <div class="grid-2">
     <div class="card">
       <h2>Low Stock Alerts</h2>
       <% if (lowStock.length === 0) { %>
         <p class="muted">All products are sufficiently stocked.</p>
       <% } else { %>
-        <table class="table">
-          <thead><tr><th>Product</th><th>Stock</th><th>Reorder Level</th></tr></thead>
-          <tbody>
-            <% lowStock.forEach(p => { %>
-              <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
-                <td><%= p.name %></td>
-                <td><%= p.stock_quantity %> <%= p.unit %></td>
-                <td><%= p.reorder_level %></td>
+        <div class="table-scroll">
+          <table class="table" id="lowStockTable" data-paginate="5">
+            <thead>
+              <tr>
+                <th data-sort="text">Product</th>
+                <th class="num" data-sort="number">Stock</th>
+                <th class="num" data-sort="number">Reorder Level</th>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <% lowStock.forEach(p => { %>
+                <tr class="<%= p.stock_quantity === 0 ? 'row-danger' : 'row-warning' %>">
+                  <td><%= p.name %></td>
+                  <td class="num"><%= p.stock_quantity %> <%= p.unit %></td>
+                  <td class="num"><%= p.reorder_level %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
       <% } %>
     </div>
+  </div>
 
-    <div class="card">
-      <h2>Recent Transactions</h2>
-      <% if (recentSales.length === 0) { %>
-        <p class="muted">No transactions yet.</p>
-      <% } else { %>
+  <div class="card">
+    <h2>Recent Transactions</h2>
+    <% if (recentSales.length === 0) { %>
+      <p class="muted">No transactions yet.</p>
+    <% } else { %>
+      <div class="table-scroll">
         <table class="table">
-          <thead><tr><th>Receipt</th><th>Cashier</th><th>Total</th><th>When</th></tr></thead>
+          <thead>
+            <tr>
+              <th data-sort="text">Receipt</th>
+              <th data-sort="text">Cashier</th>
+              <th class="num" data-sort="number">Total</th>
+              <th data-sort="text">When</th>
+            </tr>
+          </thead>
           <tbody>
             <% recentSales.forEach(s => { %>
               <tr>
-                <td><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
+                <td class="mono"><a href="/admin/sales/<%= s.id %>"><%= s.receipt_no %></a></td>
                 <td><%= s.cashier %></td>
-                <td><%= peso(s.total_amount) %></td>
-                <td><%= s.created_at %></td>
+                <td class="num text-success"><%= peso(s.total_amount) %></td>
+                <td class="muted"><%= s.created_at %></td>
               </tr>
             <% }) %>
           </tbody>
         </table>
-      <% } %>
-    </div>
+      </div>
+    <% } %>
   </div>
 </main>
 
 <script src="/js/vendor/chart.umd.min.js"></script>
 <script>
   const trendData = <%- JSON.stringify(trendData) %>;
-  const ctx = document.getElementById('salesTrendChart');
-  new Chart(ctx, {
+  const categorySales = <%- JSON.stringify(categorySales) %>;
+  const catColors = ['#22c55e', '#38bdf8', '#a78bfa', '#fbbf24', '#f472b6', '#2dd4bf'];
+
+  function formatShortDate(iso) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatPesoCompact(v) {
+    if (v >= 1000) return '₱' + (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + 'k';
+    return '₱' + Math.round(v);
+  }
+
+  // Subtle neon glow plugin for OLED line chart
+  const neonGlowPlugin = {
+    id: 'neonGlow',
+    beforeDatasetDraw(chart, args) {
+      if (chart.config.type !== 'line') return;
+      const { ctx } = chart;
+      ctx.save();
+      ctx.shadowColor = 'rgba(34, 197, 94, 0.55)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
+    },
+    afterDatasetDraw(chart) {
+      if (chart.config.type !== 'line') return;
+      chart.ctx.restore();
+    },
+  };
+
+  // 1. Sales Trend (7 days)
+  const trendCanvas = document.getElementById('salesTrendChart');
+  const tCtx = trendCanvas.getContext('2d');
+
+  const areaGrad = tCtx.createLinearGradient(0, 0, 0, 250);
+  areaGrad.addColorStop(0, 'rgba(34, 197, 94, 0.34)');
+  areaGrad.addColorStop(0.55, 'rgba(56, 189, 248, 0.10)');
+  areaGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  const strokeGrad = tCtx.createLinearGradient(0, 0, trendCanvas.parentElement.clientWidth || 500, 0);
+  strokeGrad.addColorStop(0, '#38bdf8');
+  strokeGrad.addColorStop(0.5, '#22c55e');
+  strokeGrad.addColorStop(1, '#4ade80');
+
+  const vals = trendData.map(d => Number(d.total) || 0);
+  const maxVal = Math.max(...vals, 0);
+
+  new Chart(tCtx, {
     type: 'line',
+    plugins: [neonGlowPlugin],
     data: {
-      labels: trendData.map(d => d.day.slice(5)),
+      labels: trendData.map(d => formatShortDate(d.day)),
       datasets: [{
-        label: 'Sales (₱)',
-        data: trendData.map(d => d.total),
-        borderColor: '#2b6cb0',
-        backgroundColor: 'rgba(43, 108, 176, 0.15)',
-        tension: 0.3,
+        label: 'Sales',
+        data: vals,
+        borderColor: strokeGrad,
+        backgroundColor: areaGrad,
+        borderWidth: 3,
+        pointBackgroundColor: '#05080f',
+        pointBorderColor: '#4ade80',
+        pointBorderWidth: 2.5,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        pointHoverBackgroundColor: '#22c55e',
+        pointHoverBorderColor: '#ffffff',
+        pointHoverBorderWidth: 2,
+        tension: 0.4,
         fill: true,
       }],
     },
     options: {
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true } },
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(8, 12, 22, 0.92)',
+          titleColor: '#94a3b8',
+          titleFont: { family: 'Nunito Sans', size: 12, weight: '600' },
+          bodyColor: '#86efac',
+          bodyFont: { family: 'Rubik', size: 15, weight: '700' },
+          borderColor: 'rgba(56, 189, 248, 0.28)',
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 10,
+          displayColors: false,
+          callbacks: {
+            label: (c) => '₱' + Number(c.parsed.y).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: {
+            color: '#94a3b8',
+            font: { family: 'Nunito Sans', size: 12, weight: '600' },
+            padding: 6,
+          },
+        },
+        y: {
+          beginAtZero: true,
+          suggestedMax: maxVal === 0 ? 500 : Math.ceil((maxVal * 1.15) / 100) * 100,
+          border: { display: false, dash: [4, 4] },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.06)',
+            tickLength: 0,
+          },
+          ticks: {
+            color: '#94a3b8',
+            maxTicksLimit: 5,
+            padding: 10,
+            font: { family: 'Nunito Sans', size: 12 },
+            callback: (v) => formatPesoCompact(v),
+          },
+        },
+      },
     },
   });
+
+  // 2. Category Revenue Doughnut Chart
+  const catCanvas = document.getElementById('categoryChart');
+  if (catCanvas && categorySales.length > 0) {
+    new Chart(catCanvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: categorySales.map(c => c.category),
+        datasets: [{
+          data: categorySales.map(c => c.revenue),
+          backgroundColor: categorySales.map((_, i) => catColors[i % catColors.length]),
+          borderColor: '#05080f',
+          borderWidth: 3,
+          hoverOffset: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(8, 12, 22, 0.94)',
+            titleColor: '#f8fafc',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(255, 255, 255, 0.14)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10,
+            callbacks: {
+              label: (c) => ' ₱' + Number(c.parsed).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            },
+          },
+        },
+      },
+    });
+  }
 </script>
 <%- include('../partials/foot') %>

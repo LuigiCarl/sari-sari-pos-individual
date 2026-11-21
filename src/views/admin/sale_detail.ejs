@@ -1,29 +1,42 @@
 <%- include('../partials/head') %>
 <%- include('../partials/nav') %>
 <main class="container">
-  <h1>Receipt <%= sale.receipt_no %></h1>
+  <h1>Receipt <span class="mono"><%= sale.receipt_no %></span></h1>
   <div class="card">
-    <p><strong>Cashier:</strong> <%= sale.cashier %></p>
-    <p><strong>Date:</strong> <%= sale.created_at %></p>
-    <table class="table">
-      <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
-      <tbody>
-        <% items.forEach(i => { %>
+    <div class="receipt-meta">
+      <span><strong>Cashier:</strong> <%= sale.cashier %></span>
+      <span><strong>Date:</strong> <%= sale.created_at %></span>
+    </div>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
           <tr>
-            <td><%= i.product_name %></td>
-            <td><%= peso(i.unit_price) %></td>
-            <td><%= i.quantity %></td>
-            <td><%= peso(i.subtotal) %></td>
+            <th>Product</th>
+            <th class="num">Price</th>
+            <th class="num">Qty</th>
+            <th class="num">Subtotal</th>
           </tr>
-        <% }) %>
-      </tbody>
-      <tfoot>
-        <tr><td colspan="3">Total</td><td><%= peso(sale.total_amount) %></td></tr>
-        <tr><td colspan="3">Amount Paid</td><td><%= peso(sale.amount_paid) %></td></tr>
-        <tr><td colspan="3">Change</td><td><%= peso(sale.change_amount) %></td></tr>
-      </tfoot>
-    </table>
-    <a href="/admin/sales" class="btn btn-secondary">Back to Sales</a>
+        </thead>
+        <tbody>
+          <% items.forEach(i => { %>
+            <tr>
+              <td><%= i.product_name %></td>
+              <td class="num"><%= peso(i.unit_price) %></td>
+              <td class="num"><%= i.quantity %></td>
+              <td class="num"><%= peso(i.subtotal) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3">Total</td><td class="num text-success"><%= peso(sale.total_amount) %></td></tr>
+          <tr><td colspan="3">Amount Paid</td><td class="num"><%= peso(sale.amount_paid) %></td></tr>
+          <tr><td colspan="3">Change</td><td class="num"><%= peso(sale.change_amount) %></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="receipt-actions">
+      <a href="/admin/sales" class="btn btn-secondary">Back to Sales</a>
+    </div>
   </div>
 </main>
 <%- include('../partials/foot') %>

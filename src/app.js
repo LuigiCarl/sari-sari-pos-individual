@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('./config/env');
 const path = require('path');
 const express = require('express');
 const cookieSession = require('cookie-session');
@@ -31,6 +31,10 @@ app.use(
 );
 
 app.use(flash);
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
+  next();
+});
 app.locals.peso = helpers.peso;
 
 app.get('/', (req, res) => {
